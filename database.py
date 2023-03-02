@@ -1,6 +1,7 @@
 from decouple import config
 from typing import Union
 import motor.motor_asyncio
+from bson import ObjectId
 
 MONGO_API_KEY = config('MONGO_API_KEY')
 
@@ -21,8 +22,31 @@ def todo_serializer(todo) -> dict:
     }
 
 async def db_create_todo(data: dict) -> Union[dict, bool]:
+    """
+    todoを作成する
+    """
     todo = await collection_todo.insert_one(data)
     new_todo = await collection_todo.find_one({"_id": todo.inserted_id})
     if new_todo:
         return todo_serializer(new_todo)
+    return False
+
+
+async def db_get_todos() -> list:
+    """
+    todoを取得する
+    """
+    todos = []
+    for todo in await collection_todo.find().to_list(length=100):
+        todos.append(todo_serializer(todo))
+
+    return todos
+
+async def db_get_single_todo(id:str) -> Union[dict, bool]:
+    """
+    特定のidからtodoを取得する
+    """
+    todo = await collection_todo.find_one({"_id" : ObjectId(id)})
+    if todo:
+        return todo_serializer(todo)
     return False

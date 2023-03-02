@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from decouple import config
-
+from typing import tuple
 
 JWT_KEY = config('JWT_KEY')
 
@@ -52,23 +52,32 @@ class AuthJwtCsrf():
         except jwt.InvalidTokenError as e:
             raise HTTPException(status_code=401, detail='JWT is not valid')
 
-    # def verify_jwt(self, request) -> str:
-    #     token = request.cookies.get("access_token")
-    #     if not token:
-    #         raise HTTPException(
-    #             status_code=401, detail='No JWT exist: may not set yet or deleted')
-    #     _, _, value = token.partition(" ")
-    #     subject = self.decode_jwt(value)
-    #     return subject
+    def verify_jwt(self, request) -> str:
+        """
+        jwttokenを検証をする
+        """
+        token = request.cookies.get("access_token")
+        if not token:
+            raise HTTPException(
+                status_code=401, detail='No JWT exist: may not set yet or deleted')
+        _, _, value = token.partition(" ")
+        subject = self.decode_jwt(value)
+        return subject
 
-    # def verify_update_jwt(self, request) -> tuple[str, str]:
-    #     subject = self.verify_jwt(request)
-    #     new_token = self.encode_jwt(subject)
-    #     return new_token, subject
+    def verify_update_jwt(self, request) -> tuple[str, str]:
+        """
+        jwttokenの更新と検証をする
+        """
+        subject = self.verify_jwt(request)
+        new_token = self.encode_jwt(subject)
+        return new_token, subject
 
-    # def verify_csrf_update_jwt(self, request, csrf_protect, headers) -> str:
-    #     csrf_token = csrf_protect.get_csrf_from_headers(headers)
-    #     csrf_protect.validate_csrf(csrf_token)
-    #     subject = self.verify_jwt(request)
-    #     new_token = self.encode_jwt(subject)
-    #     return new_token
+    def verify_csrf_update_jwt(self, request, csrf_protect, headers) -> str:
+        """
+        csrftokenとjwttokenの作成と検証をする
+        """
+        csrf_token = csrf_protect.get_csrf_from_headers(headers)
+        csrf_protect.validate_csrf(csrf_token)
+        subject = self.verify_jwt(request)
+        new_token = self.encode_jwt(subject)
+        return new_token

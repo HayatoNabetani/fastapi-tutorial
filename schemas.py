@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 # 受け取り型
 class TodoBody(BaseModel):
@@ -14,3 +15,12 @@ class Todo(BaseModel):
 
 class SuccessMsg(BaseModel):
     message : str
+
+
+class UserBody(BaseModel):
+    email: str
+    password: str
+
+class UserInfo(BaseModel):
+    id: Optional[str] = None
+    email: str

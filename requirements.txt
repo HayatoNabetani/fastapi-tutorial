@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+fastapi_csrf_protect
+motor
+PyJWT
+passlib
+python-decouple
+dnspython
+gunicorn
